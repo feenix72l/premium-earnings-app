@@ -1,0 +1,91 @@
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { theme } from '../theme';
+
+export function AdminDashboardScreen({ onOpenPayout, onBack }: { onOpenPayout?: () => void; onBack?: () => void }) {
+  const workers = [
+    { name: 'Ava Stone', role: 'Content', earnings: 1280, btc: '0.0126', active: true, target: '76%' },
+    { name: 'Jules Martin', role: 'Research', earnings: 1525, btc: '0.0149', active: true, target: '82%' },
+    { name: 'Nia Brooks', role: 'Data', earnings: 910, btc: '0.0091', active: false, target: '61%' },
+    { name: 'Theo Craig', role: 'Ops', earnings: 1180, btc: '0.0114', active: true, target: '73%' },
+  ];
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <LinearGradient colors={['#121819', '#090909']} style={styles.header}>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>Admin Dashboard</Text>
+          <TouchableOpacity onPress={onBack} style={styles.smallButton}>
+            <Text style={styles.smallButtonText}>Back</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Gross revenue</Text>
+            <Text style={styles.statValue}>$15.4k</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Workers</Text>
+            <Text style={styles.statValue}>18</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>BTC</Text>
+            <Text style={styles.statValue}>0.156</Text>
+          </View>
+        </View>
+      </LinearGradient>
+
+      <View style={styles.panel}>
+        <Text style={styles.panelTitle}>Worker leaderboard</Text>
+        {workers.map((worker) => (
+          <View key={worker.name} style={styles.workerRow}>
+            <View>
+              <Text style={styles.workerName}>{worker.name}</Text>
+              <Text style={styles.workerMeta}>{worker.role}</Text>
+            </View>
+            <View style={styles.rightBlock}>
+              <Text style={styles.earnings}>${worker.earnings}</Text>
+              <Text style={styles.btcText}>{worker.btc} BTC</Text>
+              <Text style={styles.statusText}>{worker.target}</Text>
+            </View>
+            <View style={[styles.dot, worker.active ? styles.dotActive : styles.dotIdle]} />
+          </View>
+        ))}
+      </View>
+
+      <TouchableOpacity style={styles.primaryButton} onPress={onOpenPayout}>
+        <Text style={styles.primaryButtonText}>View payouts</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: theme.colors.background },
+  content: { padding: 20, paddingBottom: 60 },
+  header: { borderRadius: 28, padding: 20, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.15)' },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { color: theme.colors.text, fontSize: 32, fontWeight: '800' },
+  smallButton: { backgroundColor: '#1d2325', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8 },
+  smallButtonText: { color: theme.colors.gold, fontWeight: '700' },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24 },
+  statCard: { flex: 1, backgroundColor: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 18, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.12)', marginHorizontal: 4 },
+  statLabel: { color: theme.colors.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.2 },
+  statValue: { color: theme.colors.text, fontSize: 20, fontWeight: '800', marginTop: 8 },
+  panel: { backgroundColor: theme.colors.panel, borderRadius: 24, marginTop: 20, padding: 18, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.18)' },
+  panelTitle: { color: theme.colors.text, fontSize: 22, fontWeight: '700', marginBottom: 14 },
+  workerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderBottomWidth: 1, borderColor: 'rgba(255,255,255,0.08)', paddingVertical: 12 },
+  workerName: { color: theme.colors.text, fontSize: 16, fontWeight: '700' },
+  workerMeta: { color: theme.colors.muted, fontSize: 12, marginTop: 4 },
+  rightBlock: { alignItems: 'flex-end', marginLeft: 10 },
+  earnings: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
+  btcText: { color: theme.colors.gold, fontSize: 12, marginTop: 4 },
+  statusText: { color: theme.colors.muted, fontSize: 12, marginTop: 4 },
+  dot: { width: 12, height: 12, borderRadius: 999 },
+  dotActive: { backgroundColor: theme.colors.green },
+  dotIdle: { backgroundColor: theme.colors.red },
+  primaryButton: { marginTop: 20, backgroundColor: theme.colors.gold, borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
+  primaryButtonText: { color: '#101010', fontWeight: '800', fontSize: 16 },
+});

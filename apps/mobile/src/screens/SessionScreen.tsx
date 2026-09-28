@@ -1,20 +1,28 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useMemo, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../theme';
+import { getSession, startSession, stopSession } from '../lib/api';
 
-export function SessionScreen() {
+export function SessionScreen({ onExit }: { onExit?: () => void }) {
   const [running, setRunning] = useState(true);
-  const [seconds, setSeconds] = useState(3 * 60 * 60 + 14 * 60 + 28);
+  const [seconds, setSeconds] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const workerId = 'w1';
   const hourlyRate = 28;
 
   useEffect(() => {
+    const startWorkSession = async () => {
+      setLoading(true);
+      await startSession(workerId);
+      setLoading(false);
+    };
+    startWorkSession();
+  }, []);
+
+  useEffect(() => {
     if (!running) return;
-
-    const timer = setInterval(() => {
-      setSeconds((prev) => prev + 1);
-    }, 1000);
-
+    const timer = setInterval(() => setSeconds((prev) => prev + 1), 1000);
     return () => clearInterval(timer);
   }, [running]);
 
@@ -27,6 +35,13 @@ export function SessionScreen() {
 
   const earnings = useMemo(() => (seconds / 3600) * hourlyRate, [seconds, hourlyRate]);
   const btcEquivalent = useMemo(() => (earnings / 64800).toFixed(4), [earnings]);
+
+  const handleStop = async () => {
+    setLoading(true);
+    await stopSession(workerId);
+    setLoading(false);
+    onExit?.();
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -50,8 +65,13 @@ export function SessionScreen() {
           <TouchableOpacity
             style={[styles.button, running ? styles.stopStyle : styles.startStyle]}
             onPress={() => setRunning((prev) => !prev)}
+            disabled={loading}
           >
-            <Text style={styles.buttonText}>{running ? 'Stop work' : 'Start work'}</Text>
+            <Text style={styles.buttonText}>{running ? 'Pause work' : 'Resume work'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.exitButton} onPress={handleStop} disabled={loading}>
+            <Text style={styles.exitButtonText}>{loading ? 'Ending...' : 'End session'}</Text>
           </TouchableOpacity>
         </LinearGradient>
 
@@ -62,12 +82,12 @@ export function SessionScreen() {
             <Text style={styles.infoValue}>${hourlyRate}/hr</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Target reach</Text>
-            <Text style={styles.infoValue}>86%</Text>
+            <Text style={styles.infoLabel}>Total earned</Text>
+            <Text style={styles.infoValue}>${earnings.toFixed(2)}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Next payout</Text>
-            <Text style={styles.infoValue}>$1,240</Text>
+            <Text style={styles.infoLabel}>BTC equivalent</Text>
+            <Text style={styles.infoValue}>{btcEquivalent} BTC</Text>
           </View>
         </View>
       </ScrollView>
@@ -76,111 +96,25 @@ export function SessionScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  container: {
-    flexGrow: 1,
-    padding: 20,
-  },
-  card: {
-    borderRadius: 28,
-    padding: 22,
-    borderWidth: 1,
-    borderColor: 'rgba(246, 199, 106, 0.16)',
-    marginBottom: 20,
-  },
-  kicker: {
-    color: theme.colors.gold,
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  title: {
-    color: theme.colors.text,
-    fontSize: 32,
-    fontWeight: '700',
-    marginTop: 10,
-  },
-  time: {
-    color: theme.colors.text,
-    fontSize: 38,
-    fontWeight: '800',
-    marginTop: 14,
-    letterSpacing: 2,
-  },
-  metricRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20,
-    marginBottom: 18,
-  },
-  metricBox: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-    borderRadius: 18,
-    padding: 14,
-    marginHorizontal: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(246, 199, 106, 0.12)',
-  },
-  metricLabel: {
-    color: theme.colors.muted,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-  metricValue: {
-    color: theme.colors.text,
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 10,
-  },
-  button: {
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderRadius: 16,
-    borderWidth: 1,
-  },
-  stopStyle: {
-    backgroundColor: '#2a1c14',
-    borderColor: 'rgba(246, 199, 106, 0.25)',
-  },
-  startStyle: {
-    backgroundColor: '#1d3229',
-    borderColor: 'rgba(56, 211, 159, 0.25)',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  panel: {
-    backgroundColor: theme.colors.panel,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    padding: 18,
-  },
-  panelTitle: {
-    color: theme.colors.text,
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  infoLabel: {
-    color: theme.colors.muted,
-    fontSize: 14,
-  },
-  infoValue: {
-    color: theme.colors.text,
-    fontSize: 15,
-    fontWeight: '700',
-  },
+  safeArea: { flex: 1, backgroundColor: theme.colors.background },
+  container: { flexGrow: 1, padding: 20 },
+  card: { borderRadius: 28, padding: 22, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.16)', marginBottom: 20 },
+  kicker: { color: theme.colors.gold, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: theme.colors.text, fontSize: 32, fontWeight: '700', marginTop: 10 },
+  time: { color: theme.colors.text, fontSize: 48, fontWeight: '800', marginTop: 14, letterSpacing: 2 },
+  metricRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, marginBottom: 18 },
+  metricBox: { flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.04)', borderRadius: 18, padding: 14, marginHorizontal: 6, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.12)' },
+  metricLabel: { color: theme.colors.muted, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5 },
+  metricValue: { color: theme.colors.text, fontSize: 24, fontWeight: '700', marginTop: 10 },
+  button: { paddingVertical: 16, alignItems: 'center', borderRadius: 16, borderWidth: 1, marginBottom: 10 },
+  stopStyle: { backgroundColor: '#2a1c14', borderColor: 'rgba(246, 199, 106, 0.25)' },
+  startStyle: { backgroundColor: '#1d3229', borderColor: 'rgba(56, 211, 159, 0.25)' },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  exitButton: { backgroundColor: '#1c1c1c', borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255, 107, 107, 0.3)', paddingVertical: 14, alignItems: 'center' },
+  exitButtonText: { color: '#ff6b6b', fontWeight: '800' },
+  panel: { backgroundColor: theme.colors.panel, borderRadius: 20, borderWidth: 1, borderColor: theme.colors.border, padding: 18 },
+  panelTitle: { color: theme.colors.text, fontSize: 20, fontWeight: '700', marginBottom: 12 },
+  infoRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  infoLabel: { color: theme.colors.muted, fontSize: 14 },
+  infoValue: { color: theme.colors.text, fontSize: 15, fontWeight: '700' },
 });
