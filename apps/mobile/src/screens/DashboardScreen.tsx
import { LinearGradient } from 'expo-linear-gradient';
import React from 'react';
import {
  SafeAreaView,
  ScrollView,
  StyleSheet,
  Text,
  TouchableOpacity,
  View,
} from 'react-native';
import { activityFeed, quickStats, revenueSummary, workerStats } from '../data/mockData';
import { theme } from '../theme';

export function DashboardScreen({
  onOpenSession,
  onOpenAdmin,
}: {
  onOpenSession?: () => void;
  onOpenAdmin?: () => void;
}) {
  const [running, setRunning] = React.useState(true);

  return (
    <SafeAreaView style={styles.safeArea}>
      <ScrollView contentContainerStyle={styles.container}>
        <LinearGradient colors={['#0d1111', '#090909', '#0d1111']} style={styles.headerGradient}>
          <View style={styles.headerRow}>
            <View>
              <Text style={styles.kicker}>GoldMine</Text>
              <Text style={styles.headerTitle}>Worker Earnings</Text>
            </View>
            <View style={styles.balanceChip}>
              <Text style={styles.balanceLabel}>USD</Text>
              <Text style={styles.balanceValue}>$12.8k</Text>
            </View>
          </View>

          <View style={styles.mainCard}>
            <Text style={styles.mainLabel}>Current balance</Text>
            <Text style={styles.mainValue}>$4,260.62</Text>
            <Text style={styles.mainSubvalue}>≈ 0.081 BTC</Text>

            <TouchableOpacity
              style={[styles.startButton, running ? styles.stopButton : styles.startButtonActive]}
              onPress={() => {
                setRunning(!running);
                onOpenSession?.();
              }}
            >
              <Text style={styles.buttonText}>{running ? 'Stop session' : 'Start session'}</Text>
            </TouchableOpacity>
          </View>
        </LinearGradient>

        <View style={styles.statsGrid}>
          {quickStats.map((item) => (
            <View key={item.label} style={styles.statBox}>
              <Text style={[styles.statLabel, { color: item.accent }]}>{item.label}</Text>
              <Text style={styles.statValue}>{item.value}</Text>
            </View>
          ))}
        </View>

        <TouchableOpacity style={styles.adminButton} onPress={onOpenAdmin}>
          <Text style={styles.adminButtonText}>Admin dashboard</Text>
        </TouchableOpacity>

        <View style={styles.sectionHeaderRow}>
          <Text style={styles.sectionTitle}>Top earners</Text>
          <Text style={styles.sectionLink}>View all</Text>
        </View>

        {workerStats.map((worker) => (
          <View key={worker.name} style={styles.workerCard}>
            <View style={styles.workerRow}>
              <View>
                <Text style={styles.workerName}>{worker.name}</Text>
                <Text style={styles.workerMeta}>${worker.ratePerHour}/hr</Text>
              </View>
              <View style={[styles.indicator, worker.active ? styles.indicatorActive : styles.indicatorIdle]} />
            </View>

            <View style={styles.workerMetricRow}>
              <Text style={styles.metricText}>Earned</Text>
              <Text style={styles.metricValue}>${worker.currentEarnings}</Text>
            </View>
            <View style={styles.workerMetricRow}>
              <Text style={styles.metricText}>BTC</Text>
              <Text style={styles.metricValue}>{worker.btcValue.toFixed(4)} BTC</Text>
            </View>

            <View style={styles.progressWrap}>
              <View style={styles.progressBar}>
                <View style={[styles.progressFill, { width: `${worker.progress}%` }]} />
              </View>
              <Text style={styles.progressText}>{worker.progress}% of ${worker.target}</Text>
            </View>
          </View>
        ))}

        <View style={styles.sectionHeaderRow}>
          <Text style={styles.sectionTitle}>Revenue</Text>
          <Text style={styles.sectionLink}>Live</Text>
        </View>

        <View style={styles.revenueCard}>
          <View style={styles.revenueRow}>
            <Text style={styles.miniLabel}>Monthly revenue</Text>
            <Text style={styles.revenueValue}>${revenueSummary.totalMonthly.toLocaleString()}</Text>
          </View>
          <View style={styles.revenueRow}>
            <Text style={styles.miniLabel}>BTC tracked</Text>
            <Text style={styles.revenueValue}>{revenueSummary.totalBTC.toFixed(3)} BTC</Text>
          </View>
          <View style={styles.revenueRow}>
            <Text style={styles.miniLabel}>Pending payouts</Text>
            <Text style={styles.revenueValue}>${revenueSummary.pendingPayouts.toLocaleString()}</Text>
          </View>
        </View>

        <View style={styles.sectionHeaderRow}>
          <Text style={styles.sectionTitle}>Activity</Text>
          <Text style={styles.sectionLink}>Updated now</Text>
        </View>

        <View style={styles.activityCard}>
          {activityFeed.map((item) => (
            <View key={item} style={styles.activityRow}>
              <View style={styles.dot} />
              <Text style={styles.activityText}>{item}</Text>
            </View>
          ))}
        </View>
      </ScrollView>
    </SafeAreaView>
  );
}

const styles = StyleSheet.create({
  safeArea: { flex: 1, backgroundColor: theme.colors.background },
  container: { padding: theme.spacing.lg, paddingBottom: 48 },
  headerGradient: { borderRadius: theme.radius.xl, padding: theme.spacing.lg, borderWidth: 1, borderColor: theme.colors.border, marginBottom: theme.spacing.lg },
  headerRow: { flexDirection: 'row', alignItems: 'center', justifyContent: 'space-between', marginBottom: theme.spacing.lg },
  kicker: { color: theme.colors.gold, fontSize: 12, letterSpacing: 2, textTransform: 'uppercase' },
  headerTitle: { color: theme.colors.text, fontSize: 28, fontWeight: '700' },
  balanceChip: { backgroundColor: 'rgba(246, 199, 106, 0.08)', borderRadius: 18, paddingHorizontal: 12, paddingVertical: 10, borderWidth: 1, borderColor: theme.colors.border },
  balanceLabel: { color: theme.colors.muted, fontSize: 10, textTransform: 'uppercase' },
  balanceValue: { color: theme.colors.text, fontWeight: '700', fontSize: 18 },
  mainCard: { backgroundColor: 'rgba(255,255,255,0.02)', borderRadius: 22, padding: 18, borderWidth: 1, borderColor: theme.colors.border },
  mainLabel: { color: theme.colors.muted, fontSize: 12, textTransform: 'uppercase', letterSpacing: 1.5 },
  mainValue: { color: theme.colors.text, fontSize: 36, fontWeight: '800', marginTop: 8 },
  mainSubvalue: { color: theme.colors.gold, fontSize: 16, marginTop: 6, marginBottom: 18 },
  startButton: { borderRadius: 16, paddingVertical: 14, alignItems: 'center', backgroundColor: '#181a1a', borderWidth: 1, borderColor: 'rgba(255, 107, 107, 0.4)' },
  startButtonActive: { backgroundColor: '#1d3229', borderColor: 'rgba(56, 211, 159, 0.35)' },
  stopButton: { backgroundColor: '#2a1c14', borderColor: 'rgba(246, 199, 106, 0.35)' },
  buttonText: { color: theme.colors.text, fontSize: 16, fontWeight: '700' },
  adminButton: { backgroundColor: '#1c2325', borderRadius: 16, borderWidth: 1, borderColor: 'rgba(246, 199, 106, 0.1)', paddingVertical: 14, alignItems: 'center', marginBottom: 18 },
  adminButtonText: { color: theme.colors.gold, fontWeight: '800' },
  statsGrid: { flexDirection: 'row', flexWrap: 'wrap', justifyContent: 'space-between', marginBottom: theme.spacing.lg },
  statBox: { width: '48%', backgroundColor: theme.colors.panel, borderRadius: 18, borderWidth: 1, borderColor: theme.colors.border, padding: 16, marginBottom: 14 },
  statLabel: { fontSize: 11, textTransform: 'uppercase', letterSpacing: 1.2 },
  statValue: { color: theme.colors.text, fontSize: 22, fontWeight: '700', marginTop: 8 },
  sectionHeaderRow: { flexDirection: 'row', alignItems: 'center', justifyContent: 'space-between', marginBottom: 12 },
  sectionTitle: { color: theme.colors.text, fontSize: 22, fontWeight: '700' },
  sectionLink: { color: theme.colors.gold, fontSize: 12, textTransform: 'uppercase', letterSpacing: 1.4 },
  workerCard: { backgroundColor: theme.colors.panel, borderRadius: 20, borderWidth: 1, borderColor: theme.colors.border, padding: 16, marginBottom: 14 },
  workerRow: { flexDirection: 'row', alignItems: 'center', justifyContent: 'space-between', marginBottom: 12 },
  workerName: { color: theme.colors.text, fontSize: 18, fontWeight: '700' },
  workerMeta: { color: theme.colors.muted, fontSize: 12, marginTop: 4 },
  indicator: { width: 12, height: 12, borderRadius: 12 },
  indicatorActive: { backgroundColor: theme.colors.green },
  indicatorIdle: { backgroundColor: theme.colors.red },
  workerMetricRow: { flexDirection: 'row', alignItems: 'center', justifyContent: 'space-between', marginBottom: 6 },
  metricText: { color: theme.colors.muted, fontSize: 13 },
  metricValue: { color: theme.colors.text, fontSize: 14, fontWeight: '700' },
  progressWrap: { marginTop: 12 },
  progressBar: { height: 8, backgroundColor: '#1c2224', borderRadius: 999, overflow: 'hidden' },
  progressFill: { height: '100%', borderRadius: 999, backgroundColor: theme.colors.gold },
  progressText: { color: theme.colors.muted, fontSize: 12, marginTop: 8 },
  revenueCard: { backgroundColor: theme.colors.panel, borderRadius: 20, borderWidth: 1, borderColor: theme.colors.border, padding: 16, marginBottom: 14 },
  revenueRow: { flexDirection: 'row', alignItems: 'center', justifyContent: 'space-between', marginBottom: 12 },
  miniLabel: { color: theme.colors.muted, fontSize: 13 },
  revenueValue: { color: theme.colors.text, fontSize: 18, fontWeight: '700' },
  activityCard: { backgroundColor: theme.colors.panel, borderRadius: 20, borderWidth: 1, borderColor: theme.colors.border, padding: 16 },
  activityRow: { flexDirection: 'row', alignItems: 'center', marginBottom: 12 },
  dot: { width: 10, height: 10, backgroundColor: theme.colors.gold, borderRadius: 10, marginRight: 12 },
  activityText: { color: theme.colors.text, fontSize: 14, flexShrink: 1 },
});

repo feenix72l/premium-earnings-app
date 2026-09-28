@@ -1,0 +1,40 @@
+import React from 'react';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { theme } from '../theme';
+
+export function PayoutScreen({ onBack }: { onBack?: () => void }) {
+  const payouts = [
+    { label: 'Pending payouts', value: '$3,240' },
+    { label: 'Bitcoin reserve', value: '0.156 BTC' },
+    { label: 'Processed today', value: '$1,980' },
+  ];
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Payouts</Text>
+        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back</Text>
+        </TouchableOpacity>
+      </View>
+
+      {payouts.map((item) => (
+        <View key={item.label} style={styles.card}>
+          <Text style={styles.label}>{item.label}</Text>
+          <Text style={styles.value}>{item.value}</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flexGrow: 1, backgroundColor: theme.colors.background, padding: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
+  title: { color: theme.colors.text, fontSize: 30, fontWeight: '800' },
+  backButton: { backgroundColor: '#1d2325', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 },
+  backButtonText: { color: theme.colors.gold, fontWeight: '700' },
+  card: { backgroundColor: theme.colors.panel, borderRadius: 20, padding: 18, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(246, 199, 106, 0.12)' },
+  label: { color: theme.colors.muted, textTransform: 'uppercase', fontSize: 11, letterSpacing: 1.2 },
+  value: { color: theme.colors.text, fontSize: 24, fontWeight: '800', marginTop: 8 },
+});
