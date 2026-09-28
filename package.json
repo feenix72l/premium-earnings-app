@@ -1,0 +1,17 @@
+{
+  "name": "premium-earnings-app",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:mobile": "npm --workspace apps/mobile start",
+    "dev:web": "npm --workspace apps/web dev",
+    "build:web": "npm --workspace apps/web build",
+    "lint": "echo \"No lint configured yet\""
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "eslint": "^8.57.0"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Premium Earnings",
+    "slug": "premium-earnings",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#090909"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#090909"
+      }
+    }
+  }
+}
